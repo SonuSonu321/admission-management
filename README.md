@@ -19,14 +19,18 @@ npm install
 npm start
 ```
 
-## Default Login
-- Email: `admin@example.com`
-- Password: `Admin@123`
+## Default Login Credentials
 
-## Roles
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@example.com | Admin@123 |
+| Admission Officer | officer@example.com | Officer@123 |
+| Management | management@example.com | Mgmt@123 |
+
+## Roles & Access
 | Role | Access |
 |------|--------|
-| admin | Full access |
+| admin | Full access — master setup, users, quotas, dashboard, reports |
 | admission_officer | Applicants, Seat Allocation, Admission Confirm |
 | management | Dashboard + Reports (view only) |
 
