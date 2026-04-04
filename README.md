@@ -1,5 +1,12 @@
 # Admission Management System — MERN Stack
 
+## 🚀 Live Demo
+
+| | URL |
+|---|---|
+| Frontend | https://admission-management-rho.vercel.app |
+| Backend API | https://admission-management-8rfb.onrender.com/api/health |
+
 ## Quick Start
 
 ### Backend
