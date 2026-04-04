@@ -8,13 +8,14 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? process.env.CLIENT_URL
-    : ['http://localhost:3000'],
-  credentials: true
+  origin: '*',
+  credentials: false
 }));
 app.use(express.json());
 app.use(morgan('dev'));
+
+// Health check — always responds
+app.get('/api/health', (req, res) => res.json({ status: 'OK', db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' }));
 
 // Routes
 app.use('/api/auth', require('./routes/auth.routes'));
@@ -30,26 +31,20 @@ app.use('/api/confirm-admission', require('./routes/admission.routes'));
 app.use('/api/dashboard', require('./routes/dashboard.routes'));
 app.use('/api/users', require('./routes/user.routes'));
 
-// Health check
-app.get('/api/health', (req, res) => res.json({ status: 'OK' }));
-
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({ message: err.message || 'Internal Server Error' });
 });
 
-// DB + Server
+// Start server first, then connect DB
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log('MongoDB connected');
-    app.listen(process.env.PORT || 5000, () =>
-      console.log(`Server running on port ${process.env.PORT || 5000}`)
-    );
-  })
+  .then(() => console.log('MongoDB connected'))
   .catch((err) => {
     console.error('DB connection failed:', err.message);
     console.error('MONGO_URI set:', !!process.env.MONGO_URI);
-    process.exit(1);
   });
