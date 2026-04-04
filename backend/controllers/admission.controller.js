@@ -1,19 +1,17 @@
-const mongoose = require('mongoose');
 const Applicant = require('../models/Applicant');
 const Admission = require('../models/Admission');
 const Counter = require('../models/Counter');
 const Program = require('../models/Program');
 const Quota = require('../models/Quota');
 
-const generateAdmissionNumber = async (program, quota, session) => {
-  // Format: INST/2026/UG/CSE/KCET/0001
+const generateAdmissionNumber = async (program, quota) => {
   const year = new Date().getFullYear();
   const key = `${program.code}/${year}/${program.courseType}/${quota.quotaType}`;
 
   const counter = await Counter.findByIdAndUpdate(
     key,
     { $inc: { seq: 1 } },
-    { upsert: true, new: true, session }
+    { upsert: true, new: true }
   );
 
   const seq = String(counter.seq).padStart(4, '0');
@@ -21,50 +19,39 @@ const generateAdmissionNumber = async (program, quota, session) => {
 };
 
 exports.confirmAdmission = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
     const { applicantId } = req.body;
 
-    const applicant = await Applicant.findById(applicantId).session(session);
-    if (!applicant) throw new Error('Applicant not found');
-    if (applicant.admissionConfirmed) throw new Error('Admission already confirmed');
-    if (!applicant.seatAllocated) throw new Error('Seat not yet allocated');
-    if (applicant.documentStatus !== 'Verified') throw new Error('Documents not verified');
-    if (applicant.feeStatus !== 'Paid') throw new Error('Fee not paid. Admission confirmation requires fee payment');
+    const applicant = await Applicant.findById(applicantId);
+    if (!applicant) return res.status(404).json({ message: 'Applicant not found' });
+    if (applicant.admissionConfirmed) return res.status(400).json({ message: 'Admission already confirmed' });
+    if (!applicant.seatAllocated) return res.status(400).json({ message: 'Seat not yet allocated' });
+    if (applicant.documentStatus !== 'Verified') return res.status(400).json({ message: 'Documents not verified' });
+    if (applicant.feeStatus !== 'Paid') return res.status(400).json({ message: 'Fee not paid. Admission confirmation requires fee payment' });
 
-    const program = await Program.findById(applicant.programApplied).session(session);
+    const program = await Program.findById(applicant.programApplied);
     const quota = await Quota.findOne({
       program: applicant.programApplied,
       quotaType: applicant.quotaType,
-    }).session(session);
+    });
 
-    const admissionNumber = await generateAdmissionNumber(program, quota, session);
+    const admissionNumber = await generateAdmissionNumber(program, quota);
 
-    const admission = await Admission.create(
-      [
-        {
-          admissionNumber,
-          applicant: applicant._id,
-          program: program._id,
-          quota: quota._id,
-          academicYear: program.academicYear,
-          confirmedBy: req.user._id,
-        },
-      ],
-      { session }
-    );
+    const admission = await Admission.create({
+      admissionNumber,
+      applicant: applicant._id,
+      program: program._id,
+      quota: quota._id,
+      academicYear: program.academicYear,
+      confirmedBy: req.user._id,
+    });
 
     applicant.admissionConfirmed = true;
-    await applicant.save({ session });
+    await applicant.save();
 
-    await session.commitTransaction();
-    res.status(201).json({ message: 'Admission confirmed', admissionNumber, admission: admission[0] });
+    res.status(201).json({ message: 'Admission confirmed', admissionNumber, admission });
   } catch (err) {
-    await session.abortTransaction();
     res.status(400).json({ message: err.message });
-  } finally {
-    session.endSession();
   }
 };
 

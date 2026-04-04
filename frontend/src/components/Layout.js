@@ -9,6 +9,7 @@ const navItems = [
   { to: '/seat-allocation', label: 'Seat Allocation', icon: '🪑', roles: ['admin', 'admission_officer'] },
   { to: '/admission-confirm', label: 'Confirm Admission', icon: '✅', roles: ['admin', 'admission_officer'] },
   { to: '/master-setup', label: 'Master Setup', icon: '⚙️', roles: ['admin'] },
+  { to: '/seat-matrix', label: 'Seat Matrix', icon: '🪑', roles: ['admin'] },
   { to: '/users', label: 'Users', icon: '👥', roles: ['admin'] },
   { to: '/reports', label: 'Reports', icon: '📋', roles: ['admin', 'management'] },
 ];

@@ -13,9 +13,6 @@ const admissionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Prevent updates to confirmed admission records
-admissionSchema.pre('findOneAndUpdate', function () {
-  throw new Error('Admission records are immutable once confirmed.');
-});
+// Admission records should not be updated after creation
 
 module.exports = mongoose.model('Admission', admissionSchema);

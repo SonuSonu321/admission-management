@@ -13,6 +13,7 @@ import ApplicantFormPage from './pages/ApplicantFormPage';
 import SeatAllocationPage from './pages/SeatAllocationPage';
 import AdmissionConfirmPage from './pages/AdmissionConfirmPage';
 import MasterSetupPage from './pages/MasterSetupPage';
+import SeatMatrixPage from './pages/SeatMatrixPage';
 import UsersPage from './pages/UsersPage';
 import ReportsPage from './pages/ReportsPage';
 
@@ -38,6 +39,7 @@ function App() {
             <Route path="/seat-allocation" element={<SeatAllocationPage />} />
             <Route path="/admission-confirm" element={<AdmissionConfirmPage />} />
             <Route path="/master-setup" element={<MasterSetupPage />} />
+            <Route path="/seat-matrix" element={<SeatMatrixPage />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/reports" element={<ReportsPage />} />
           </Route>
