@@ -50,5 +50,6 @@ mongoose
   })
   .catch((err) => {
     console.error('DB connection failed:', err.message);
+    console.error('MONGO_URI set:', !!process.env.MONGO_URI);
     process.exit(1);
   });
